@@ -1,0 +1,9 @@
+#!/bin/sh
+
+regexp="Doom[[:space:]]Emacs$"
+if [[ $(xdotool getactivewindow getwindowname) =~ $regexp ]]; then
+    command="(emacs-bspwm-integration \"$@\")"
+    emacsclient -e "$command"
+else
+    bspc $@
+fi
