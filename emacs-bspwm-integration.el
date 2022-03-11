@@ -15,8 +15,52 @@
     ((rx bos "node -p")
      (emacs-bspwm-split-window
       (intern (elt (split-string command) 2))))
+    ((rx bos "node -z")
+     (emacs-bspwm-resize-window
+      ;; direction
+      (intern (elt (split-string command) 2))
+      ;; dx
+      (string-to-number (elt (split-string command) 3))
+      ;; dy
+      (string-to-number (elt (split-string command) 4))))
     ("node -c" (evil-quit))
     (- (bspc command))))
+
+
+;; TODO: make into macro
+(defun emacs-bspwm-resize-window (dir dx dy)
+  (pcase dir
+  ('top_left ((emacs-bspwm-resize-window-straight 'top dx dy)
+              (emacs-bspwm-resize-window-straight 'left dx dy)))
+  ('top_right ((emacs-bspwm-resize-window-straight 'top dx dy)
+              (emacs-bspwm-resize-window-straight 'right dx dy)))
+  ('bottom_left ((emacs-bspwm-resize-window-straight 'bottom dx dy)
+              (emacs-bspwm-resize-window-straight 'left dx dy)))
+  ('bottom_right ((emacs-bspwm-resize-window-straight 'bottom dx dy)
+              (emacs-bspwm-resize-window-straight 'right dx dy)))
+  (- (emacs-bspwm-resize-window-straight dir dx dy))))
+
+(defun emacs-bspwm-resize-window-straight (dir dx dy)
+  (let ((target-window
+        (pcase dir                      ; The window that must grow/shrink it's right or bottom border
+          ('top (windmove-find-other-window 'up))
+          ('bottom (frame-selected-window))
+          ('left (windmove-find-other-window 'left))
+          ('right (frame-selected-window))))
+        (into-window                    ; The window that must expand or contract it's top or left border in order for target-window to grow/shrink
+         (pcase dir
+           ('top (frame-selected-window))
+           ('bottom (windmove-find-other-window 'down))
+           ('left (frame-selected-window))
+           ('right (windmove-find-other-window 'right)))))
+    (if (or (null target-window) (window-minibuffer-p target-window)) (error "cannot resize"))
+    (if (or (null into-window) (window-minibuffer-p into-window)) (error "cannot resize"))
+      (pcase dir
+        ('top (window-resize target-window dy nil nil 't)) ;
+        ('bottom (window-resize target-window dy nil nil 't))
+        ('left (window-resize target-window dx 't nil 't))
+        ('right (window-resize target-window dx 't nil 't)))))
+
 
 (defun emacs-bspwm-split-window (dir)
   (pcase dir
