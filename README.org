@@ -1,0 +1,12 @@
+#+TITLE:   emacs-bspwm-integration
+#+STARTUP: inlineimages nofold
+
+* Description
+Integration of bspc commands in Emacs. Provides a 'seamless' experience in moving, closing, switching, and splitting windows in bspwm and emacs.
+
+Inspired by [[https://sqrtminusone.xyz/posts/2021-10-04-emacs-i3/][this]] blogpost about integration between i3 and Emacs.
+
+* Prerequisites
++ evil-mode
+
+* Configuration
